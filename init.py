@@ -48,48 +48,54 @@ from typing_extensions import Annotated, deprecated
 
 AppType = TypeVar("AppType", bound="FastAPI")
 
-
+#1 데이터 설정
+#2 핵심 동작
+#3 생명 주기
+#4 미들웨어 및 예외처리
+#5 고급 설정
+#6 not use 
 class FastAPI(Starlette):
   def __init__(
     self: AppType,
     *,
-    debug: Annotated[bool, Doc(""),] = False,
-    routes: Annotated[Optional[List[BaseRoute]], Doc(""),deprecated(),] = None,
-    title: Annotated[str, Doc(""),] = "FastAPI",
-    summary: Annotated[Optional[str], Doc(""),] = None,
-    description: Annotated[str, Doc(""),] = "",
-    version: Annotated[str, Doc(""),] = "0.1.0",
-    openapi_tags: Annotated[Optional[List[Dict[str, Any]]], Doc(""),] = None,
-    servers: Annotated[Optional[List[Dict[str, Union[str, Any]]]], Doc(""),] = None,
-    dependencies: Annotated[Optional[Sequence[Depends]], Doc(""),] = None,
-    default_response_class: Annotated[Type[Response], Doc(""),] = Default(HSONResponse),
-    redirect_slashes: Annotated[bool, Doc(""),] = True,
-    docs_url: Annotated[Optional[str], Doc(""),] = "/docs",
-    redoc_url: Annotated[Optional[str], Doc(""),] = "/redoc",
-    swagger_ui_oauth2_redirect_url: Annotated[Optional[str], Doc(""),] = "/docs/oauth2-redirect",
-    swagger_ui_init_oauth: Annotated[Optional[Dict[str, Any]], Doc(""),] = None,
-    middleware: Annotated[Optional[Sequence[Middleware]], Doc(""),] = None,
-    exception_handlers: Annotated[
+    debug: Annotated[bool, Doc(""),] = False, #2 디버깅 정보 페이지
+    routes: Annotated[Optional[List[BaseRoute]], Doc(""),deprecated(),] = None, #2 초기 라우트 목록 보통 사용x
+    title: Annotated[str, Doc(""),] = "FastAPI", #1 API 이름
+    summary: Annotated[Optional[str], Doc(""),] = None, #1 API 한 줄 요약
+    description: Annotated[str, Doc(""),] = "", #1 상세 설명
+    version: Annotated[str, Doc(""),] = "0.1.0", #1 버전
+    openapi_url: Annotated[Optional[str], Doc(""),] = "/openapi.json", #1 API URL 경로
+    openapi_tags: Annotated[Optional[List[Dict[str, Any]]], Doc(""),] = None, #1 경로 그룹화 태그 정보
+    servers: Annotated[Optional[List[Dict[str, Union[str, Any]]]], Doc(""),] = None, #1 서버 환경의 URL 목록
+    dependencies: Annotated[Optional[Sequence[Depends]], Doc(""),] = None, #2 전역 의존성 설정
+    default_response_class: Annotated[Type[Response], Doc(""),] = Default(JSONResponse), #2 반환시 사용할 기본 응답 클래스
+    redirect_slashes: Annotated[bool, Doc(""),] = True, #2 끝에 "/" 있는 경로에 요청 시 올바른 경로로 리디렉션
+    docs_url: Annotated[Optional[str], Doc(""),] = "/docs", #1 문서 페이지 URL
+    redoc_url: Annotated[Optional[str], Doc(""),] = "/redoc", #1 다른 스타일의 문서 URL
+    swagger_ui_oauth2_redirect_url: Annotated[Optional[str], Doc(""),] = "/docs/oauth2-redirect", #5
+    swagger_ui_init_oauth: Annotated[Optional[Dict[str, Any]], Doc(""),] = None, #5
+    middleware: Annotated[Optional[Sequence[Middleware]], Doc(""),] = None, #4 미들웨어 목록 지정
+    exception_handlers: Annotated[ #4 특정 예외 상황시 사용자 정의 예외 처리 함수 등록
             Optional[Dict[Union[int, Type[Exception]],Callable[[Request, Any], Coroutine[Any, Any, Response]],]],Doc(""),] = None,
-    on_startup: Annotated[Optional[Sequence[Callable[[], Any]]], Doc(""),] = None,
-    on_shutdown: Annotated[Optional[Sequence[Callable[[], Any]]], Doc(""),] = None,
-    lifespan: Annotated[Optional[Lifespan[AppType]], Doc(""),] = None,
-    terms_of_service: Annotated[Optional[str], Doc(""),] = None,
-    contact: Annotated[Optional[Dict[str, Union[str, Any]]],Doc(""),] = None,
-    license_info: Annotated[Optional[Dict[str, Union[str, Any]]],Doc(""),] = None,
+    on_startup: Annotated[Optional[Sequence[Callable[[], Any]]], Doc(""),] = None, #3 서버가 실행될 때 실행할 함수
+    on_shutdown: Annotated[Optional[Sequence[Callable[[], Any]]], Doc(""),] = None, #3 서버가 종료될 때 실행할 함수
+    lifespan: Annotated[Optional[Lifespan[AppType]], Doc(""),] = None, #3 최신 방식의 생명주기 관리자 (위 2개 보완)
+    terms_of_service: Annotated[Optional[str], Doc(""),] = None, #1 서비스 이용 약관 페이지 URL
+    contact: Annotated[Optional[Dict[str, Union[str, Any]]],Doc(""),] = None, #1 개발자 연락처
+    license_info: Annotated[Optional[Dict[str, Union[str, Any]]],Doc(""),] = None, #1 라이선스 정보
     openapi_prefix: Annotated[str,Doc(""),deprecated(),] = "",
-    root_path: Annotated[str,Doc(""),] = "",
+    root_path: Annotated[str,Doc(""),] = "", #2 리버스 프록시 뒤에서 실행 시에 경로의 접두사를 알려주는데 사용
     root_path_in_servers: Annotated[bool, Doc(""),] = True,
     responses: Annotated[Optional[Dict[Union[int, str], Dict[str, Any]]],Doc(""),] = None,
     callbacks: Annotated[Optional[List[BaseRoute]],Doc(""),] = None,
     webhooks: Annotated[Optional[routing.APIRouter],Doc(""),] = None,
-    deprecated: Annotated[Optional[bool],Doc(""),] = None,
-    include_in_schema: Annotated[bool, Doc(""),] = True,
-    swagger_ui_parameters: Annotated[Optional[Dict[str, Any]],Doc(""),] = None,
-    generate_unique_id_function: Annotated[Callable[[routing.APIRoute], str],Doc(""),] = Default(generate_unique_id),
+    deprecated: Annotated[Optional[bool],Doc(""),] = None, #5
+    include_in_schema: Annotated[bool, Doc(""),] = True, #5
+    swagger_ui_parameters: Annotated[Optional[Dict[str, Any]],Doc(""),] = None, #5
+    generate_unique_id_function: Annotated[Callable[[routing.APIRoute], str],Doc(""),] = Default(generate_unique_id), #5
     separate_input_output_schemas: Annotated[bool, Doc(""),] = True,
-    openapi_external_docs: Annotated[Optional[Dict[str, Any]],Doc(""),] = True,
-    **extra: Annotated[Any,Doc(""),],) -> None:
+    openapi_external_docs: Annotated[Optional[Dict[str, Any]],Doc(""),] = True, #6 root_path 로 대체
+    **extra: Annotated[Any,Doc(""),],) -> None: #5 커스텀 필드
       self.debug = debug
         self.title = title
         self.summary = summary
